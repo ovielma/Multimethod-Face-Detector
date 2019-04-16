@@ -6,5 +6,5 @@ In this project, we attempt to implement a face detector that is trained using A
 * **Bootstrapping**: Bootstrapping is a method for improving the quality of the training set, by identifying and including more challenging examples. Bootstrapping is performed by iterating between 1). Training a face detector using the training set, and 2). Applying the face detector on additional data, and adding to the training set cases where the face detector makes mistakes.
 * **Classifier cascades**: An AdaBoost-based detector was implemented in the code available online for this course. In that detector, the same strong classifier was applied to every single window of the image. A classifier cascade is a sequence of classifiers, where the first classifier is very fast but relatively inaccurate, and each subsequent classifier is slower but more accurate. For every classifier in the cascade (except for the final classifier), we need to choose a threshold that determines whether a window should be classified as nonface, or should be passed on to the next classifier in the cascade. That threshold should be chosen so that it causes as few mistakes as possible.
 
-#Authors
+# Authors
 Ozy Vielma & Jaysen Gonzales
