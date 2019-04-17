@@ -5,6 +5,10 @@
 % pull changes each of us have made.
 % Likewise for all data including training and test images.
 
+% set directory path for code and data files
+clc;
+directories;
+%%
 % First step of the training procedure is to use rectangle filters on all 
 % training images (refer to main_script in 12_boosting code example on TRACS).
 
@@ -20,7 +24,7 @@
 % Test run of rectangle filter type 1. It looks like we will
 % need to iterate through all training images with a for loop for training.
 
-clear; close all;
+close all;
 photo = read_gray('04202d61.bmp');
 figure(1); imshow(photo, []);
 rec_filter = rectangle_filter1(1, 1);
