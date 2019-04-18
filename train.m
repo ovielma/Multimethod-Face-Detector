@@ -52,7 +52,9 @@ end
 %%
 
 
-cropNonFaces = cell(2700,20);
+cropNonFaces = cell(130,20);
+% number of patches from each non-face image
+numOfPatches = 20;
 
 
 for i = 1:num_nonfaces-1
@@ -63,7 +65,7 @@ for i = 1:num_nonfaces-1
     [h w]= size(photo);
     L = 60;
     
-    for j = 1:20
+    for j = 1:numOfPatches
         
         cropNonFaces{i,j} = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
         
