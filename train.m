@@ -37,7 +37,7 @@ num_nonfaces = size(training_nonfaces_list, 1);
 % to 60x60 with respect to the centroid of the training image. By default
 % each training image measures 100x100
 %%
-cropFaces = {};
+cropFaces = cell(3047,1);
 
 
 for i = 1:num_faces-1
@@ -52,32 +52,23 @@ end
 %%
 
 
-cropNonFaces = {};
+cropNonFaces = cell(2700,20);
 
-for i = 1:3 %change to num_nonfaces-1
+
+for i = 1:num_nonfaces-1
     
     nonFace2Crop = getfield(training_nonfaces_list(i),'name');
     photo = read_gray(nonFace2Crop);
     
     [h w]= size(photo);
     L = 60;
-
-    % Crop 
-    crop1 = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
-    crop2 = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
-    crop3 = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
-    crop4 = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
-    crop5 = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
     
-    %figure(1); imshow(crop1,[0 255]);
-   
-    cropNonFaces{i,1} = crop1;
-    cropNonFaces{i,2} = crop2;
-    cropNonFaces{i,3} = crop3;
-    cropNonFaces{i,4} = crop4;
-    cropNonFaces{i,5} = crop5;
-    
-     
+    for j = 1:20
+        
+        cropNonFaces{i,j} = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
+        
+    end
+         
 end
 
 
