@@ -7,6 +7,7 @@
 
 % set directory path for code and data files
 clc;
+clear;
 directories;
 %%
 % First step of the training procedure is to use rectangle filters on all 
@@ -15,22 +16,21 @@ directories;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%
-%%%  Rectangle filters
+%%%  Train Using Adaboost & Rectangle filters
 %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%
-% Test run of rectangle filter type 1. It looks like we will
-% need to iterate through all training images with a for loop for training.
+% For each training_face and training_nonface image, we need to crop
+% to 60x60 with respect to the centroid of the training image. By default
+% each training image measures 100x100
 
 close all;
 photo = read_gray('04202d61.bmp');
 figure(1); imshow(photo, []);
-rec_filter = rectangle_filter1(1, 1);
-result = imfilter(photo, rec_filter, 'same', 'symmetric');
-figure(2); imshow(result, []);
+centroid = (size(photo)/2)/2;
+trainingpatch = imcrop(photo, [centroid 59 59]);
+figure(2); imshow(trainingpatch, []);
 
-rec_filter2 = rectangle_filter1(20, 10);
-result2 = imfilter(photo, rec_filter2, 'same', 'symmetric');
-figure(3); imshow(result2, []);
+
