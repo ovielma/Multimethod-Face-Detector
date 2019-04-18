@@ -9,6 +9,19 @@
 clc;
 clear;
 directories;
+
+% training faces list
+training_faces_path = [training_directory, 'training_faces'];
+training_faces_list = dir(training_faces_path);
+
+% training nonfaces list
+training_nonfaces_path = [training_directory, 'training_nonfaces'];
+training_nonfaces_list = dir(training_nonfaces_path);
+
+% get sizes of lists
+num_faces = size(training_faces_list, 1);
+num_nonfaces = size(training_nonfaces_list, 1);
+
 %%
 % First step of the training procedure is to use rectangle filters on all 
 % training images (refer to main_script in 12_boosting code example on TRACS).
