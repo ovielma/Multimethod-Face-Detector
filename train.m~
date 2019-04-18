@@ -36,12 +36,51 @@ num_nonfaces = size(training_nonfaces_list, 1);
 % For each training_face and training_nonface image, we need to crop
 % to 60x60 with respect to the centroid of the training image. By default
 % each training image measures 100x100
+%%
+cropFaces = {};
 
 
-for i =
-  0:10
+for i = 1:num_faces-1
+    
+    face2Crop = getfield(training_faces_list(i),'name');
+    photo = read_gray(face2Crop);
+    centroid = (size(photo)/2)/2;
+    trainingpatch = imcrop(photo, [centroid 59 59]);
+    cropFaces{i} = trainingpatch;
+  
+end
+%%
+cropNon = {};
+for i = 1:5
+    
+    face2Crop = getfield(training_nonfaces_list(i),'name');
+    photo = read_gray(face2Crop);
+    
+    for j = 1:5
+        [n m]= size(photo);
+        L = 60;
+
+        % Crop
+        crop = photo(randi(n-L+1)+(0:L-1),randi(m-L+1)+(0:L-1));
+
+        cropNon{i} = crop;
+
+    end
+        
+        
+end
+    
+    
+    
+    
 
 
+
+%%
+
+
+
+%%
 
 %close all;
 %photo = read_gray('04202d61.bmp');

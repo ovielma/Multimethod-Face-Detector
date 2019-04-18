@@ -39,17 +39,51 @@ num_nonfaces = size(training_nonfaces_list, 1);
 %%
 cropFaces = {};
 
-for i = 1:5
+
+for i = 1:num_faces-1
     
     face2Crop = getfield(training_faces_list(i),'name');
     photo = read_gray(face2Crop);
     centroid = (size(photo)/2)/2;
     trainingpatch = imcrop(photo, [centroid 59 59]);
     cropFaces{i} = trainingpatch;
-    figure(i);imshow(trainingpatch, []);
-    
-    
+  
 end
+%%
+
+
+cropNon = {};
+for i = 1:3 %change to num_nonfaces-1
+    
+    face2Crop = getfield(training_nonfaces_list(i),'name');
+    photo = read_gray(face2Crop);
+    
+    [n m]= size(photo);
+    L = 60;
+
+    % Crop
+    crop1 = photo(randi(n-L+1)+(0:L-1),randi(m-L+1)+(0:L-1));
+    crop2 = photo(randi(n-L+1)+(0:L-1),randi(m-L+1)+(0:L-1));
+    crop3 = photo(randi(n-L+1)+(0:L-1),randi(m-L+1)+(0:L-1));
+    crop4 = photo(randi(n-L+1)+(0:L-1),randi(m-L+1)+(0:L-1));
+    crop5 = photo(randi(n-L+1)+(0:L-1),randi(m-L+1)+(0:L-1));
+    
+    %figure(1);imshow(crop1,[0 255]);
+   
+    cropNon{i,1} = crop1;
+    cropNon{i,2} = crop2;
+    cropNon{i,3} = crop3;
+    cropNon{i,4} = crop4;
+    cropNon{i,5} = crop5;
+    
+     
+end
+    
+
+    
+    
+
+
 
 %%
 
