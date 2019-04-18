@@ -52,52 +52,33 @@ end
 %%
 
 
-cropNon = {};
+cropNonFaces = {};
+
 for i = 1:3 %change to num_nonfaces-1
     
-    face2Crop = getfield(training_nonfaces_list(i),'name');
-    photo = read_gray(face2Crop);
+    nonFace2Crop = getfield(training_nonfaces_list(i),'name');
+    photo = read_gray(nonFace2Crop);
     
-    [n m]= size(photo);
+    [h w]= size(photo);
     L = 60;
 
-    % Crop
-    crop1 = photo(randi(n-L+1)+(0:L-1),randi(m-L+1)+(0:L-1));
-    crop2 = photo(randi(n-L+1)+(0:L-1),randi(m-L+1)+(0:L-1));
-    crop3 = photo(randi(n-L+1)+(0:L-1),randi(m-L+1)+(0:L-1));
-    crop4 = photo(randi(n-L+1)+(0:L-1),randi(m-L+1)+(0:L-1));
-    crop5 = photo(randi(n-L+1)+(0:L-1),randi(m-L+1)+(0:L-1));
+    % Crop 
+    crop1 = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
+    crop2 = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
+    crop3 = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
+    crop4 = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
+    crop5 = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
     
-    %figure(1);imshow(crop1,[0 255]);
+    %figure(1); imshow(crop1,[0 255]);
    
-    cropNon{i,1} = crop1;
-    cropNon{i,2} = crop2;
-    cropNon{i,3} = crop3;
-    cropNon{i,4} = crop4;
-    cropNon{i,5} = crop5;
+    cropNonFaces{i,1} = crop1;
+    cropNonFaces{i,2} = crop2;
+    cropNonFaces{i,3} = crop3;
+    cropNonFaces{i,4} = crop4;
+    cropNonFaces{i,5} = crop5;
     
      
 end
-    
-
-    
-    
-
-
-
-%%
-
-
-
-%%
-
-%close all;
-%photo = read_gray('04202d61.bmp');
-%figure(1); imshow(photo, []);
-%centroid = (size(photo)/2)/2;
-%trainingpatch = imcrop(photo, [centroid 59 59]);
-%figure(2); imshow(trainingpatch, []);
-
 
 
 
