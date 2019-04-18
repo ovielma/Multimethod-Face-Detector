@@ -53,6 +53,7 @@ end
 
 
 cropNonFaces = cell(130,20);
+
 % number of patches from each non-face image
 numOfPatches = 20;
 
@@ -70,8 +71,23 @@ for i = 1:num_nonfaces-1
         cropNonFaces{i,j} = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
         
     end
+    
+    
          
 end
 
+%looking at patches of non face images
+%imshow(cropNonFaces{100,17},[0 255]);
 
 
+
+%%
+A = cropFaces{1,1};
+
+B = integral_image(A);
+
+F = rectangle_filter1(50, 40);
+figure(2); imshow(F, []);
+
+tic; responses = imfilter(A, F, 'same', 'symmetric'); toc
+figure(3); imshow(responses, []);
