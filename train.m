@@ -63,7 +63,7 @@ for i = 1:num_faces-1
     % calculate integral image from cropped faces
     A = cropFaces{i,1};
     B = integral_image(A);
-    figure(i); imshow(B, []);
+    %figure(i); imshow(B, []);
     faceIntegrals{i, 1} = B;
   
 end
@@ -92,6 +92,14 @@ for i = 1:num_nonfaces-1
         integralNonFaces{i,j} = integral_image(cropNonFaces{i,j});
     end
             
+end
+
+%%
+
+number = 1000;
+weak_classifiers = cell(number, 1);
+for i = 1:number
+    weak_classifiers{i} = generate_classifier(60, 60);
 end
 
 %looking at patches of non face images
