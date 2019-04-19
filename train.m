@@ -36,10 +36,22 @@ num_nonfaces = size(training_nonfaces_list, 1);
 %%
 % Generate a set of cropped faces measuring 60x60 and roughly the same number
 % of non-faces to use for training. By default each training image measures 100x100
+% for our particular data set.
 
+% Calculate integrals for all training samples. 
+
+% The integral image is used as a quick and effective way of calculating the
+% sum of values (pixel values) in a given image ? or a rectangular subset of 
+% a grid (the given image). It can also, or is mainly, used for calculating 
+% the average intensity within a given image. If one wants to use the integral
+% image, it is normally a wise idea to make sure the image is in greyscale first.
+
+% Create cell to store cropped faces from training set
 cropFaces = cell(3047,1);
+% Create cell to store face integrals calculated for training samples
+faceIntegrals = cell(3047, 1);
 
-
+% iterate through all number of faces to crop and generate integral images.
 for i = 1:num_faces-1
     
     face2Crop = getfield(training_faces_list(i),'name');
@@ -48,8 +60,15 @@ for i = 1:num_faces-1
     centroid = (size(photo)/2)/2;
     trainingpatch = imcrop(photo, [centroid 59 59]);
     cropFaces{i} = trainingpatch;
+    % calculate integral image from cropped faces
+    A = cropFaces{i,1};
+    B = integral_image(A);
+    figure(i); imshow(B, []);
+    faceIntegrals{i, 1} = B;
   
 end
+
+%%
 
 cropNonFaces = cell(130,20);
 
@@ -76,25 +95,6 @@ end
 %looking at patches of non face images
 %imshow(cropNonFaces{100,17},[0 255]);
 
-
-
-%%
-% Calculate integrals for all training samples. 
-
-% The integral image is used as a quick and effective way of calculating the
-% sum of values (pixel values) in a given image ? or a rectangular subset of 
-% a grid (the given image). It can also, or is mainly, used for calculating 
-% the average intensity within a given image. If one wants to use the integral
-% image, it is normally a wise idea to make sure the image is in greyscale first.
-
-% Create cell to store face integrals calculated for training samples
-faceIntegrals = cell(3047, 1);
-
-for i = 1:cropFaces-1
-    
-    
-    
-end
 
 A = cropFaces{1,1};
 
