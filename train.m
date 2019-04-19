@@ -49,7 +49,7 @@ num_nonfaces = size(training_nonfaces_list, 1);
 % Create cell to store cropped faces from training set
 cropFaces = cell(3047,1);
 % Create cell to store face integrals calculated for training samples
-faceIntegrals = cell(3047, 1);
+faceIntegrals = cell(1,3047);
 
 % iterate through all number of faces to crop and generate integral images.
 for i = 1:num_faces-1
@@ -64,9 +64,10 @@ for i = 1:num_faces-1
     A = cropFaces{i,1};
     B = integral_image(A);
     %figure(i); imshow(B, []);
-    faceIntegrals{i, 1} = B;
+    faceIntegrals{1, i} = B;
   
 end
+
 
 %%
 
@@ -95,12 +96,75 @@ for i = 1:num_nonfaces-1
 end
 
 %%
+%transform integral NonFaces to 1 x 2600
+NonFacesintegral = {};
+for i =1:num_nonfaces-1
+  for j =1:20
+      
+    NonFacesintegral{end+1} = integralNonFaces{i,j};  
+  
+  end
+    
+end
 
+%%
+
+%generate 1000 random classifiers  
 number = 1000;
-weak_classifiers = cell(number, 1);
+weak_classifiers = cell(1,number);
 for i = 1:number
     weak_classifiers{i} = generate_classifier(60, 60);
 end
+%%
+face_horizontal =60;
+face_vertical = 60;
+
+%%
+example_number = (num_faces-1) + (numOfPatches * (num_nonfaces-1));
+%%
+labels = zeros(example_number, 1);
+%%
+labels (1:num_faces-1) = 1;
+%%
+labels((num_faces):example_number) = -1;
+%%
+examples = zeros(face_vertical, face_horizontal, example_number);
+%%
+%convert cell array to matrix
+faceIntegralArray = zeros(face_vertical,face_horizontal,num_faces-1);
+for i = 1: num_faces-1
+    faceIntegralArray(:,:,i) = cell2mat(faceIntegrals([i]));
+end
+
+%%
+examples (:, :, 1:num_faces-1) = faceIntegralArray;
+%%
+%convert cell array to matrix
+NonfaceIntegralArray = zeros(face_vertical,face_horizontal,(numOfPatches*130));
+for i = 1: num_nonfaces-1
+    NonfaceIntegralArray(:,:,i) = cell2mat(NonFacesintegral([i]));
+end
+%%
+examples(:, :, num_faces:example_number) = NonfaceIntegralArray;
+%%
+
+classifier_number = numel(weak_classifiers);
+%%
+
+responses =  zeros(classifier_number, example_number);
+%%
+tic;
+for example = 1:example_number
+    integral = examples(:, :, example);
+    for feature = 1:classifier_number
+        classifier = weak_classifiers {feature};
+        responses(feature, example) = eval_weak_classifier(classifier, integral);
+    end
+    disp(example)
+end
+toc;
+
+
 
 %looking at patches of non face images
 %imshow(cropNonFaces{100,17},[0 255]);
