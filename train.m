@@ -1,3 +1,4 @@
+
 % This script will perform the entire training sequence
 % Before you run this code, make sure that you are in the right directory 
 
@@ -21,8 +22,8 @@ num_faces = size(training_faces_list, 1);
 num_nonfaces = size(training_nonfaces_list, 1);
 
 %%
-% First step of the training procedure is to use rectangle filters on all 
-% training images (refer to main_script in 12_boosting code example on TRACS)
+% First step of the training procedure is to use rectangle filters with adaboost
+% on all training images
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -33,10 +34,9 @@ num_nonfaces = size(training_nonfaces_list, 1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%
-% For each training_face and training_nonface image, we need to crop
-% to 60x60 with respect to the centroid of the training image. By default
-% each training image measures 100x100
-%%
+% Generate a set of cropped faces measuring 60x60 and roughly the same number
+% of non-faces to use for training. By default each training image measures 100x100
+
 cropFaces = cell(3047,1);
 
 
@@ -44,13 +44,12 @@ for i = 1:num_faces-1
     
     face2Crop = getfield(training_faces_list(i),'name');
     photo = read_gray(face2Crop);
+    % crop face images with respect to the center
     centroid = (size(photo)/2)/2;
     trainingpatch = imcrop(photo, [centroid 59 59]);
     cropFaces{i} = trainingpatch;
   
 end
-%%
-
 
 cropNonFaces = cell(130,20);
 
@@ -71,9 +70,7 @@ for i = 1:num_nonfaces-1
         cropNonFaces{i,j} = photo(randi(h-L+1)+(0:L-1),randi(w-L+1)+(0:L-1));
         
     end
-    
-    
-         
+            
 end
 
 %looking at patches of non face images
@@ -82,6 +79,23 @@ end
 
 
 %%
+% Calculate integrals for all training samples. 
+
+% The integral image is used as a quick and effective way of calculating the
+% sum of values (pixel values) in a given image ? or a rectangular subset of 
+% a grid (the given image). It can also, or is mainly, used for calculating 
+% the average intensity within a given image. If one wants to use the integral
+% image, it is normally a wise idea to make sure the image is in greyscale first.
+
+% Create cell to store face integrals calculated for training samples
+faceIntegrals = cell(3047, 1);
+
+for i = 1:cropFaces-1
+    
+    
+    
+end
+
 A = cropFaces{1,1};
 
 B = integral_image(A);
@@ -91,3 +105,7 @@ figure(2); imshow(F, []);
 
 tic; responses = imfilter(A, F, 'same', 'symmetric'); toc
 figure(3); imshow(responses, []);
+
+
+
+
