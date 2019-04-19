@@ -108,52 +108,41 @@ for i =1:num_nonfaces-1
 end
 
 %%
+face_horizontal =60;
+face_vertical = 60;
 
 %generate 1000 random classifiers  
 number = 1000;
 weak_classifiers = cell(1,number);
 for i = 1:number
-    weak_classifiers{i} = generate_classifier(60, 60);
+    weak_classifiers{i} = generate_classifier(face_horizontal, face_vertical);
 end
-%%
-face_horizontal =60;
-face_vertical = 60;
 
 %%
+
 example_number = (num_faces-1) + (numOfPatches * (num_nonfaces-1));
-%%
 labels = zeros(example_number, 1);
-%%
 labels (1:num_faces-1) = 1;
-%%
 labels((num_faces):example_number) = -1;
-%%
 examples = zeros(face_vertical, face_horizontal, example_number);
-%%
+
 %convert cell array to matrix
 faceIntegralArray = zeros(face_vertical,face_horizontal,num_faces-1);
 for i = 1: num_faces-1
-    faceIntegralArray(:,:,i) = cell2mat(faceIntegrals([i]));
+    faceIntegralArray(:,:,i) = cell2mat(faceIntegrals(i));
 end
-
-%%
 examples (:, :, 1:num_faces-1) = faceIntegralArray;
-%%
+
 %convert cell array to matrix
 NonfaceIntegralArray = zeros(face_vertical,face_horizontal,(numOfPatches*130));
 for i = 1: num_nonfaces-1
-    NonfaceIntegralArray(:,:,i) = cell2mat(NonFacesintegral([i]));
+    NonfaceIntegralArray(:,:,i) = cell2mat(NonFacesintegral(i));
 end
-%%
+
 examples(:, :, num_faces:example_number) = NonfaceIntegralArray;
-%%
-
 classifier_number = numel(weak_classifiers);
-%%
-
 responses =  zeros(classifier_number, example_number);
-%%
-tic;
+
 for example = 1:example_number
     integral = examples(:, :, example);
     for feature = 1:classifier_number
@@ -162,9 +151,34 @@ for example = 1:example_number
     end
     disp(example)
 end
-toc;
+
+%%
+
+boosted_classifier = AdaBoost(responses, labels, 15);
+%%
+% load a photograph
+photo = read_gray('DSC01181.JPG');
+
+% rotate the photograph to make faces more upright (we 
+% are cheating a bit, to save time compared to searching
+% over multiple rotations).
+photo2 = imresize(photo, [60 60]);
+figure(1); imshow(photo2, []);
+
+% w1 and w2 are the locations of the faces, according to me.
+% Used just for bookkeeping.
+%w1 = photo2(40:87, 75:113);
+%w2 = photo2(100:130, 47:71);
+
+%%
+tic; result = apply_classifier_aux(photo2, boosted_classifier, weak_classifiers, [60 60]); toc
+figure(2); imshow(result, []);
+figure(3); imshow(max((result > 4) * 255, photo2 * 0.5), [])
+
+%%
+
+tic; [result, boxes] = boosted_detector_demo(photo2, 1, boosted_classifier, weak_classifiers, [60, 60], 2); toc
+figure(2); imshow(result, []);
 
 
 
-%looking at patches of non face images
-%imshow(cropNonFaces{100,17},[0 255]);
