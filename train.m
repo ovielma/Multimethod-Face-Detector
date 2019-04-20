@@ -114,7 +114,7 @@ face_horizontal = 60;
 face_vertical = 60;
 
 %generate 1000 random classifiers  
-number = 1000;
+number = 1200;
 weak_classifiers = cell(1,number);
 for i = 1:number
     weak_classifiers{i} = generate_classifier(face_horizontal, face_vertical);
@@ -160,54 +160,13 @@ for example = 1:example_number
     disp(example)
 end
 
-%%
-% verify computed responses are correct
-
-% choose a classifier
-%a = random_number(1, classifier_number);
-%wc = weak_classifiers{a};
-
-% choose a training image
-%b = random_number(1, example_number);
-%if (b <= num_faces-1)
-%    integral = faceIntegralArray(:, :, b);
-%else
-%    integral = NonfaceIntegralArray(:, :, b - num_faces-1);
-%end
-
-% see the precomputed response
-%disp([a, b]);
-%disp(responses(a, b));
-%disp(eval_weak_classifier(wc, integral));
 
 %%
 % pass data collected on responses, labels and number of rounds to AdaBoost
 boosted_classifier = AdaBoost(responses, labels, 15);
 
-%%
-% load a photograph
-photo = read_gray('DSC01181.JPG');
 
-% rotate the photograph to make faces more upright (we 
-% are cheating a bit, to save time compared to searching
-% over multiple rotations).
-photo2 = imresize(photo, 0.34, 'bilinear');
-figure(1); imshow(photo2, []);
 
-% w1 and w2 are the locations of the faces, according to me.
-% Used just for bookkeeping.
-%w1 = photo2(40:87, 75:113);
-%w2 = photo2(100:130, 47:71);
-
-%%
-tic; result = apply_classifier_aux(photo2, boosted_classifier, weak_classifiers, [60 60]); toc
-figure(2); imshow(result, []);
-figure(3); imshow(max((result > 4) * 255, photo2 * 0.5), [])
-
-%%
-
-tic; [result, boxes] = boosted_detector_demo(photo2, 1, boosted_classifier, weak_classifiers, [60, 60], 2); toc
-figure(2); imshow(result, []);
 
 
 
