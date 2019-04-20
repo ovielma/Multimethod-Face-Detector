@@ -38,7 +38,7 @@ num_nonfaces = size(training_nonfaces_list, 1);
 % of non-faces to use for training. By default each training image measures 100x100
 % for our particular data set.
 
-% Calculate integrals for all training samples. 
+% Calculate integrals within the for loop for all training samples. 
 
 % The integral image is used as a quick and effective way of calculating the
 % sum of values (pixel values) in a given image ? or a rectangular subset of 
@@ -46,9 +46,9 @@ num_nonfaces = size(training_nonfaces_list, 1);
 % the average intensity within a given image. If one wants to use the integral
 % image, it is normally a wise idea to make sure the image is in greyscale first.
 
-% Create cell to store cropped faces from training set
+% Create cell array to store cropped faces from training set
 cropFaces = cell(3047,1);
-% Create cell to store face integrals calculated for training samples
+% Create cell array to store face integrals calculated from training samples
 faceIntegrals = cell(1,3047);
 
 % iterate through all number of faces to crop and generate integral images.
@@ -59,6 +59,7 @@ for i = 1:num_faces-1
     % crop face images with respect to the center
     centroid = (size(photo)/2)/2;
     trainingpatch = imcrop(photo, [centroid 59 59]);
+    % add cropped images to cell array
     cropFaces{i} = trainingpatch;
     % calculate integral image from cropped faces
     A = cropFaces{i,1};
@@ -71,11 +72,11 @@ end
 
 %%
 
-%cell array for NonFaces
+% Create cell array to store cropped non-faces from training set
 cropNonFaces = cell(130,20);
-%cell array for integral images Non Face
+% Create cell array to store non-face integrals calculated from training samples
 integralNonFaces = cell(130,20);
-% number of patches from each non-face image
+% number of patches to crop from each non-face image
 numOfPatches = 20;
 
 
@@ -96,7 +97,7 @@ for i = 1:num_nonfaces-1
 end
 
 %%
-%transform integral NonFaces to 1 x 2600
+% transform integral NonFaces cell array to 1 x 2600
 NonFacesintegral = {};
 for i =1:num_nonfaces-1
   for j =1:20
@@ -108,7 +109,8 @@ for i =1:num_nonfaces-1
 end
 
 %%
-face_horizontal =60;
+% Initialize dimensions for face images
+face_horizontal = 60;
 face_vertical = 60;
 
 %generate 1000 random classifiers  
@@ -119,10 +121,15 @@ for i = 1:number
 end
 
 %%
+%  precompute responses of all training examples on all weak classifiers
 
+% store size of all training samples/patches
 example_number = (num_faces-1) + (numOfPatches * (num_nonfaces-1));
+% initialize vector measuring example_number x 1 with zeros
 labels = zeros(example_number, 1);
+% label 3047 face samples as 1
 labels (1:num_faces-1) = 1;
+% label 130 non-face samples as -1
 labels((num_faces):example_number) = -1;
 examples = zeros(face_vertical, face_horizontal, example_number);
 
@@ -140,6 +147,7 @@ for i = 1: num_nonfaces-1
 end
 
 examples(:, :, num_faces:example_number) = NonfaceIntegralArray;
+% numel returns the number of elements, n, in array weak_classifiers
 classifier_number = numel(weak_classifiers);
 responses =  zeros(classifier_number, example_number);
 
@@ -153,8 +161,29 @@ for example = 1:example_number
 end
 
 %%
+% verify computed responses are correct
 
+% choose a classifier
+%a = random_number(1, classifier_number);
+%wc = weak_classifiers{a};
+
+% choose a training image
+%b = random_number(1, example_number);
+%if (b <= num_faces-1)
+%    integral = faceIntegralArray(:, :, b);
+%else
+%    integral = NonfaceIntegralArray(:, :, b - num_faces-1);
+%end
+
+% see the precomputed response
+%disp([a, b]);
+%disp(responses(a, b));
+%disp(eval_weak_classifier(wc, integral));
+
+%%
+% pass data collected on responses, labels and number of rounds to AdaBoost
 boosted_classifier = AdaBoost(responses, labels, 15);
+
 %%
 % load a photograph
 photo = read_gray('DSC01181.JPG');
@@ -162,7 +191,7 @@ photo = read_gray('DSC01181.JPG');
 % rotate the photograph to make faces more upright (we 
 % are cheating a bit, to save time compared to searching
 % over multiple rotations).
-photo2 = imresize(photo, [60 60]);
+photo2 = imresize(photo, 0.34, 'bilinear');
 figure(1); imshow(photo2, []);
 
 % w1 and w2 are the locations of the faces, according to me.
