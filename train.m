@@ -113,12 +113,21 @@ end
 face_horizontal = 60;
 face_vertical = 60;
 
-%generate 1000 random classifiers  
+% save this preprocessor data to load in test file once bootstrapping &
+% cascading are applied. Uncomment and run code below to save.
+% save preprocessData
+
+%%
+%generate 1200 random classifiers  
 number = 1200;
 weak_classifiers = cell(1,number);
 for i = 1:number
     weak_classifiers{i} = generate_classifier(face_horizontal, face_vertical);
 end
+
+% save these weak classifiers to load in test file once bootstrapping &
+% cascading are applied. Uncomment and run code below to save.
+% save classifiers1200 weak_classifiers
 
 %%
 %  precompute responses of all training examples on all weak classifiers
@@ -165,6 +174,11 @@ end
 % pass data collected on responses, labels and number of rounds to AdaBoost
 boosted_classifier = AdaBoost(responses, labels, 15);
 
+% save boosted classifier to load in test file once bootstrapping &
+% cascading are applied. Uncomment and run code below to save.
+% save boosted15 boosted_classifier
+
+%%
 
 
 

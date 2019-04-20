@@ -5,6 +5,9 @@ testing_faces_path = [training_directory, 'training_nonfaces'];
 testing_faces_list = dir(testing_faces_path);
 testing_faces_list = remove_directories_from_dir_list(testing_faces_list);
 
+% load preprocessData
+% load classifiers1200
+% load boosted15
 
 
 %%
