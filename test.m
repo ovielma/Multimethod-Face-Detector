@@ -12,8 +12,9 @@ testing_nonfaces_list = dir(testing_nonfaces_path);
 testing_nonfaces_list = remove_directories_from_dir_list(testing_nonfaces_list);
 
 
-load preprocessData
-load classifiers1150
+load intergrals;
+load training;
+load classifiers1550
 load boosted15;
 
 

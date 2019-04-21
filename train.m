@@ -118,8 +118,8 @@ face_vertical = 60;
 % save preprocessData
 
 %%
-%generate 1150 random classifiers  
-number = 1150;
+%generate 1550 random classifiers  
+number = 1550;
 weak_classifiers = cell(1,number);
 for i = 1:number
     weak_classifiers{i} = generate_classifier(face_horizontal, face_vertical);
@@ -127,7 +127,7 @@ end
 
 % save these weak classifiers to load in test file once bootstrapping &
 % cascading are applied. Uncomment and run code below to save.
-% save classifiers1150 weak_classifiers
+save classifiers1550 weak_classifiers
 
 %%
 %  precompute responses of all training examples on all weak classifiers
@@ -155,6 +155,8 @@ for i = 1: num_nonfaces-1
     NonfaceIntegralArray(:,:,i) = cell2mat(NonFacesintegral(i));
 end
 
+%save intergrals NonfaceIntegralArray faceIntegralArray
+
 examples(:, :, num_faces:example_number) = NonfaceIntegralArray;
 % numel returns the number of elements, n, in array weak_classifiers
 classifier_number = numel(weak_classifiers);
@@ -170,13 +172,16 @@ for example = 1:example_number
 end
 
 
+%
+%save training responses labels classifier_number example_number;
+
 %%
 % pass data collected on responses, labels and number of rounds to AdaBoost
 boosted_classifier = AdaBoost(responses, labels, 15);
 
 % save boosted classifier to load in test file once bootstrapping &
 % cascading are applied. Uncomment and run code below to save.
-% save boosted15 boosted_classifier
+%save boosted15 boosted_classifier
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
