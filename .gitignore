@@ -1,3 +1,5 @@
+.gitignore
+.DS_Store
 directories.m
 train.m~
 test.m~

@@ -1,13 +1,15 @@
+% test.m tests face detector using skin detection and classifier cascades
+% using a classifier trained with AdaBoost and bootstrapping
 
-%%
+% load all data with code below
+% load preprocessData
+% load classifiers1200
+% load boosted15
+
 %TESTING CROPPED IMAGES
 testing_faces_path = [training_directory, 'training_nonfaces'];
 testing_faces_list = dir(testing_faces_path);
 testing_faces_list = remove_directories_from_dir_list(testing_faces_list);
-
-% load preprocessData
-% load classifiers1200
-% load boosted15
 
 
 %%
@@ -29,3 +31,10 @@ for i =1:130
     end
   
 end
+
+%% 
+
+
+
+
+
