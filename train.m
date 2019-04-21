@@ -118,8 +118,8 @@ face_vertical = 60;
 % save preprocessData
 
 %%
-%generate 1200 random classifiers  
-number = 1200;
+%generate 1150 random classifiers  
+number = 1150;
 weak_classifiers = cell(1,number);
 for i = 1:number
     weak_classifiers{i} = generate_classifier(face_horizontal, face_vertical);
@@ -127,7 +127,7 @@ end
 
 % save these weak classifiers to load in test file once bootstrapping &
 % cascading are applied. Uncomment and run code below to save.
-% save classifiers1200 weak_classifiers
+% save classifiers1150 weak_classifiers
 
 %%
 %  precompute responses of all training examples on all weak classifiers
