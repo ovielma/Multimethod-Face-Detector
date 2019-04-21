@@ -127,7 +127,7 @@ end
 
 % save these weak classifiers to load in test file once bootstrapping &
 % cascading are applied. Uncomment and run code below to save.
-save classifiers1550 weak_classifiers
+% save classifiers1550 weak_classifiers
 
 %%
 %  precompute responses of all training examples on all weak classifiers
