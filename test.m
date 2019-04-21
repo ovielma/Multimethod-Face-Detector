@@ -73,6 +73,23 @@ end
 croppedFaceAcc = (predicted/770) * 100;
 
 
+%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%  Skin Detection
+%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% read histograms
+clear;
+negative_histogram = read_double_image('negatives.bin');
+positive_histogram = read_double_image('positives.bin');
 
+%%
 
+testImg = double(imread('clintonAD2505_468x448.jpg'));
+
+result = detect_skin(testImg, positive_histogram,  negative_histogram);
+figure (2); imshow(result, []);
