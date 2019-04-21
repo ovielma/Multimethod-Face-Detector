@@ -93,4 +93,4 @@ positive_histogram = read_double_image('positives.bin');
 testImg = double(imread('clintonAD2505_468x448.jpg'));
 
 result = detect_skin(testImg, positive_histogram,  negative_histogram);
-figure (2); imshow(result, []);
+figure (2); imshow(result > .6, []);
