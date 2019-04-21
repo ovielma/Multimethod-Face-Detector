@@ -2,11 +2,6 @@
 % using a classifier trained with AdaBoost and bootstrapping
 
 
-%TESTING CROPPED IMAGES
-testing_faces_path = [training_directory, 'training_nonfaces'];
-testing_faces_list = dir(testing_faces_path);
-testing_faces_list = remove_directories_from_dir_list(testing_faces_list);
-
 
 %%
 
@@ -42,13 +37,6 @@ for i =1:36
     end
   
 end
-
-
-%% 
-
-
-
-
 
 
 nonFaceAcc = (predicted/37) * 100;
