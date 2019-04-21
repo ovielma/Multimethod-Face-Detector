@@ -196,8 +196,40 @@ boosted_classifier = AdaBoost(responses, labels, 15);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% (Initialization) choose some training examples, not too few, not too many
+% For bootstrapping, once we have trained a detector, we should apply it to
+% all images in training_faces and training_nonfaces, identify windows where
+% the detector makes mistakes, add those windows to the training set, and retrain.
 
+% In order to implement bootstrapping, the following steps must be followed
+
+% 1. (Initialization) choose some training examples, not too few, not too many
+% 2. Train the detector
+% 3. Apply the detector to all training images
+% 4. Identify mistakes. 
+% 5. Add mistakes to the training examples
+% 6. Repeat step 2 unless performance has stopped
+
+% training samples that may be used? We dont want to use all 5647, so half?
+training_examples = zeros(60,60,2822);
+
+for i = 1:2822
+    training_examples = examples(:,:,i);
+end
+
+
+
+
+%%
+
+% The code below I was just running to test how our adaboost trained
+% detector behaved and whether it drew boxes correctly so far. We don't
+% need it for bootstrapping.
+photo = read_gray('clintonAD2505_468x448.JPG');
+% apply the boosted detector, and get the 
+% top 2 matches.
+[result, boxes] = boosted_detector_demo(photo, 1:0.5:3, boosted_classifier, weak_classifiers, [60, 60], 2);
+figure(1); imshow(photo, []);
+figure(2); imshow(result, [];
 
 
 
