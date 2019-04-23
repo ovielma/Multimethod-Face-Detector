@@ -69,7 +69,7 @@ for i = 1:num_faces-1
   
 end
 
-%save cropFaceImages cropFaces;
+save cropFaceImages cropFaces;
 %%
 
 % Create cell array to store cropped non-faces from training set
@@ -96,7 +96,7 @@ for i = 1:num_nonfaces-1
             
 end
 
-%save crop_non_face_images cropNonFaces;
+save crop_non_face_images cropNonFaces;
 
 %%
 % transform integral NonFaces cell array to 1 x 2600
@@ -120,8 +120,8 @@ face_vertical = 60;
 
 
 %%
-%generate 1550 random classifiers  
-number = 1550;
+%generate 5000 random classifiers  
+number = 5000;
 weak_classifiers = cell(1,number);
 for i = 1:number
     weak_classifiers{i} = generate_classifier(face_horizontal, face_vertical);
@@ -132,7 +132,7 @@ end
 
 
 
-%save classifiers1550 weak_classifiers
+save classifiers5000 weak_classifiers
 
 
 %%
@@ -163,7 +163,7 @@ for i = 1: 2600
 end
 
 
-%save intergrals NonfaceIntegralArray faceIntegralArray
+save intergrals NonfaceIntegralArray faceIntegralArray
 %%
 examples(:, :, num_faces:example_number) = NonfaceIntegralArray;
 % numel returns the number of elements, n, in array weak_classifiers
@@ -181,17 +181,17 @@ end
 
 
 %
-%save training responses labels classifier_number example_number;
+save training responses labels classifier_number example_number;
 
 
 %%
 % pass data collected on responses, labels and number of rounds to AdaBoost
-boosted_classifier = AdaBoost(responses, labels, 15);
+boosted_classifier = AdaBoost(responses, labels, 30);
 
 % save boosted classifier to load in test file once bootstrapping &
 % cascading are applied. Uncomment and run code below to save.
 
-%save boosted15 boosted_classifier
+save boosted30 boosted_classifier
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
