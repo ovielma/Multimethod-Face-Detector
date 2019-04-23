@@ -4,7 +4,7 @@
 
 
 %%
-
+clear;
 directories;
 
 testing_nonfaces_path = [training_directory, 'test_nonfaces'];
@@ -14,23 +14,25 @@ testing_nonfaces_list = remove_directories_from_dir_list(testing_nonfaces_list);
 
 load intergrals;
 load training;
-load classifiers1550
 load boosted15;
+load classifiers1550;
 
 
 %TESTING FOR NONFACES IMAGES
 %%
 predicted = 0;
 miss = 0;
-
+total = 0;
 %%
-for i =1:36
+for i =1:1
     
     face2Test = getfield(testing_nonfaces_list(i),'name');
-    photo = read_gray(face2Test);
-    photoT = imresize(photo, [60 60]);
+    photoT = read_gray(face2Test);
+    
     result = apply_classifier_aux(photoT, boosted_classifier, weak_classifiers, [60 60]);
-    class = max(result(:));
+    class = max(max(result));
+    total = total + class;
+   
     if class <= 0
         predicted = predicted +1;
     else
@@ -38,9 +40,9 @@ for i =1:36
     end
   
 end
+total = total / 36;
 
-
-nonFaceAcc = (predicted/37) * 100;
+nonFaceAcc = (predicted/36) * 100;
 
 %%
 %TESTING CROPPED FACES IMAGES
@@ -54,16 +56,21 @@ testing_cropped_faces_list = remove_directories_from_dir_list(testing_cropped_fa
 %%
 predicted = 0;
 miss = 0;
-
+total = 0;
 %%
 for i =1:770
     
     face2Test = getfield(testing_cropped_faces_list(i),'name');
-    photo = read_gray(face2Test);
-    photoT = imresize(photo, [60 60]);
+    photoT = read_gray(face2Test);
+    centroid = (size(photoT)/2)/2;
+    photoT = imcrop(photoT, [centroid 59 59]);
+   
     result = apply_classifier_aux(photoT, boosted_classifier, weak_classifiers, [60 60]);
-    class = max(result(:));
-    if class > 0
+    class = result(31,31);
+    total = total + class;
+    disp(class);
+    
+    if class > 0 
         predicted = predicted +1;
     else
         miss = miss +1;
@@ -71,7 +78,44 @@ for i =1:770
   
 end
 
+total = total / 770;
 croppedFaceAcc = (predicted/770) * 100;
+
+
+%%
+%TESTING CROPPED FACES IMAGES
+testing_faces_path = [training_directory, 'test_face_photos'];
+testing_faces_list = dir(testing_faces_path);
+testing_faces_list = remove_directories_from_dir_list(testing_faces_list);
+
+
+
+%TESTING FOR FACES
+%%
+predicted = 0;
+miss = 0;
+total = 0;
+%%
+for i =1:20
+    
+    face2Test = getfield(testing_faces_list(i),'name');
+    face2Test = double(imread(face2Test));
+    photoT = imresize(face2Test, [60 60]);
+    result = apply_classifier_aux(photoT, boosted_classifier, weak_classifiers, [60 60]);
+    class = result(31,31);
+    total = total + class;
+ 
+    
+    if class > -4
+        predicted = predicted +1;
+    else
+        miss = miss +1;
+    end
+  
+end
+
+total = total / 20;
+FaceAcc = (predicted/20) * 100;
 
 
 %% 

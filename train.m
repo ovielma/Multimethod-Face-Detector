@@ -69,7 +69,7 @@ for i = 1:num_faces-1
   
 end
 
-
+save cropFaceImages cropFaces;
 %%
 
 % Create cell array to store cropped non-faces from training set
@@ -95,6 +95,8 @@ for i = 1:num_nonfaces-1
     end
             
 end
+
+save crop_non_face_images cropNonFaces;
 
 %%
 % transform integral NonFaces cell array to 1 x 2600
@@ -130,7 +132,7 @@ end
 
 
 
-%save classifiers1550 weak_classifiers
+save classifiers1550 weak_classifiers
 
 
 %%
@@ -146,21 +148,23 @@ labels (1:num_faces-1) = 1;
 labels((num_faces):example_number) = -1;
 examples = zeros(face_vertical, face_horizontal, example_number);
 
+%%
 %convert cell array to matrix
 faceIntegralArray = zeros(face_vertical,face_horizontal,num_faces-1);
 for i = 1: num_faces-1
     faceIntegralArray(:,:,i) = cell2mat(faceIntegrals(i));
 end
-examples (:, :, 1:num_faces-1) = faceIntegralArray;
+examples(:, :, 1:num_faces-1) = faceIntegralArray;
 
 %convert cell array to matrix
 NonfaceIntegralArray = zeros(face_vertical,face_horizontal,(numOfPatches*130));
-for i = 1: num_nonfaces-1
+for i = 1: 2600
     NonfaceIntegralArray(:,:,i) = cell2mat(NonFacesintegral(i));
 end
 
-%save intergrals NonfaceIntegralArray faceIntegralArray
 
+save intergrals NonfaceIntegralArray faceIntegralArray
+%%
 examples(:, :, num_faces:example_number) = NonfaceIntegralArray;
 % numel returns the number of elements, n, in array weak_classifiers
 classifier_number = numel(weak_classifiers);
@@ -177,7 +181,8 @@ end
 
 
 %
-%save training responses labels classifier_number example_number;
+save training responses labels classifier_number example_number;
+
 
 %%
 % pass data collected on responses, labels and number of rounds to AdaBoost
@@ -185,7 +190,8 @@ boosted_classifier = AdaBoost(responses, labels, 15);
 
 % save boosted classifier to load in test file once bootstrapping &
 % cascading are applied. Uncomment and run code below to save.
-%save boosted15 boosted_classifier
+
+save boosted15 boosted_classifier
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -196,11 +202,180 @@ boosted_classifier = AdaBoost(responses, labels, 15);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+clear;
+load cropFaceImages;
+load crop_non_face_images;
+load classifiers3000;
+load training;
+load intergrals;
+load boosted15;
 % For bootstrapping, once we have trained a detector, we should apply it to
 % all images in training_faces and training_nonfaces, identify windows where
-% the detector makes mistakes, add those windows to the training set, and retrain.
+% the detector makes mistakes, add those windows to the training examples, and retrain.
 
 % In order to implement bootstrapping, the following steps must be followed
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%CONVERTING CELL ARRAYS TO MATRICES
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+cropNonFaces2 = {};
+for i =1:130
+  for j =1:20
+      
+    cropNonFaces2{end+1,1} = cropNonFaces{i,j};  
+  
+  end  
+end
+
+%%
+%convert cell array to matrix
+faceArray = zeros(60,60,3047);
+for i = 1: 3047
+    faceArray(:,:,i) = cell2mat(cropFaces(i));
+end
+
+%%
+%convert cell array to matrix
+NonfaceArray = zeros(60,60,(20*130));
+for i = 1: 2600
+    NonfaceArray(:,:,i) = cell2mat(cropNonFaces2(i));
+end
+
+
+examples (:, :, 1:3047) = faceArray;
+examples(:, :, 3048:5647) = NonfaceArray;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%Identify misclassifications 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%
+nonFace = 0;
+face = 0;
+
+%%
+location_missed_classified = [];
+labels2 = [];
+
+for i =3000:5000
+    
+    photo = examples(:,:,i);
+    
+    photoT = imresize(photo, [60 60]);
+    result = apply_classifier_aux(photoT, boosted_classifier, weak_classifiers, [60 60]);
+    class = result(31,31);
+    label = labels(i,1);
+    if (label == 1 && class < -4)
+       location_missed_classified(end+1,1) = i;
+       labels2(end+1,1) = label;
+    end
+    
+    if (label == -1 && class > -4)
+       location_missed_classified(end+1,1) = i;
+       labels2(end+1,1) = label;
+             
+    end
+    
+  
+end
+%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%RETRAIN MISCLASSIFICATIONS 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+newExamples = [];
+
+for i = 1:363
+    value = location_missed_classified(i,1);
+    newExamples(:,:,i) = examples(:,:,value);
+    
+    
+end
+
+%%
+for i=1:137
+   
+    newExamples(:,:,end+1) = examples(:,:,i);
+    labels2(end+1,1) = labels(i,1);
+end
+
+
+
+%%
+%generate 2000 random classifiers  
+number = 2000;
+weak_classifiers2 = cell(1,number);
+for i = 1:number
+    weak_classifiers2{i} = generate_classifier(60, 60);
+end
+
+save classifiersB2000 weak_classifiers2;
+%%
+classifier_number = numel(weak_classifiers2);
+responses2 =  zeros(classifier_number, 500);
+
+for example = 1:500
+    integral = newExamples(:, :, example);
+    for feature = 1:classifier_number
+        classifier2 = weak_classifiers2 {feature};
+        responses2(feature, example) = eval_weak_classifier(classifier2, integral);
+    end
+    disp(example)
+end
+
+
+
+
+%%
+% pass data collected on responses, labels and number of rounds to AdaBoost
+boosted_classifier2 = AdaBoost(responses2, labels2, 30);
+
+%%
+save BOOT_boosted_classifier boosted_classifier2
+
+%%
+%TESTING IF ADABOOST HELPED
+location_missed_classified2 = [];
+labels3 = [];
+
+for i =3000:5000
+    
+    photo = examples(:,:,i);
+    
+    photoT = imresize(photo, [60 60]);
+    result = apply_classifier_aux(photoT, boosted_classifier2, weak_classifiers2, [60 60]);
+    class = result(31,31);
+    label = labels(i,1);
+    if (label == 1 && class < -4)
+       location_missed_classified2(end+1,1) = i;
+       labels3(end+1,1) = label;
+    end
+    
+    if (label == -1 && class > -4)
+       location_missed_classified2(end+1,1) = i;
+       labels3(end+1,1) = label;
+             
+    end
+    
+  
+end
+
+
+
+
 
 % 1. (Initialization) choose some training examples, not too few, not too many
 % 2. Train the detector
@@ -210,11 +385,7 @@ boosted_classifier = AdaBoost(responses, labels, 15);
 % 6. Repeat step 2 unless performance has stopped
 
 % training samples that may be used? We dont want to use all 5647, so half?
-training_examples = zeros(60,60,2822);
-
-for i = 1:2822
-    training_examples = examples(:,:,i);
-end
+%training_examples = zeros(60,60,2822);
 
 
 
@@ -224,12 +395,12 @@ end
 % The code below I was just running to test how our adaboost trained
 % detector behaved and whether it drew boxes correctly so far. We don't
 % need it for bootstrapping.
-photo = read_gray('clintonAD2505_468x448.JPG');
+%photo = read_gray('clintonAD2505_468x448.JPG');
 % apply the boosted detector, and get the 
 % top 2 matches.
-[result, boxes] = boosted_detector_demo(photo, 1:0.5:3, boosted_classifier, weak_classifiers, [60, 60], 2);
-figure(1); imshow(photo, []);
-figure(2); imshow(result, [];
+%[result, boxes] = boosted_detector_demo(photo, 1:0.5:3, boosted_classifier, weak_classifiers, [60, 60], 2);
+%figure(1); imshow(photo, []);
+%figure(2); imshow(result, [];
 
 
 
