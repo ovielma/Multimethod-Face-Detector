@@ -69,7 +69,7 @@ for i = 1:num_faces-1
   
 end
 
-save cropFaceImages cropFaces;
+%save cropFaceImages cropFaces;
 %%
 
 % Create cell array to store cropped non-faces from training set
@@ -96,7 +96,7 @@ for i = 1:num_nonfaces-1
             
 end
 
-save crop_non_face_images cropNonFaces;
+%save crop_non_face_images cropNonFaces;
 
 %%
 % transform integral NonFaces cell array to 1 x 2600
@@ -132,7 +132,7 @@ end
 
 
 
-save classifiers1550 weak_classifiers
+%save classifiers1550 weak_classifiers
 
 
 %%
@@ -163,7 +163,7 @@ for i = 1: 2600
 end
 
 
-save intergrals NonfaceIntegralArray faceIntegralArray
+%save intergrals NonfaceIntegralArray faceIntegralArray
 %%
 examples(:, :, num_faces:example_number) = NonfaceIntegralArray;
 % numel returns the number of elements, n, in array weak_classifiers
@@ -181,7 +181,7 @@ end
 
 
 %
-save training responses labels classifier_number example_number;
+%save training responses labels classifier_number example_number;
 
 
 %%
@@ -191,7 +191,7 @@ boosted_classifier = AdaBoost(responses, labels, 15);
 % save boosted classifier to load in test file once bootstrapping &
 % cascading are applied. Uncomment and run code below to save.
 
-save boosted15 boosted_classifier
+%save boosted15 boosted_classifier
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -202,18 +202,24 @@ save boosted15 boosted_classifier
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% In order to implement bootstrapping, the following steps must be followed
+
+% 1. (Initialization) choose some training examples, not too few, not too many
+% 2. Train the detector
+% 3. Apply the detector to all training images
+% 4. Identify mistakes. 
+% 5. Add mistakes to the training examples
+% 6. Repeat step 2 unless performance has stopped
+
+% training samples that may be used? We dont want to use all 5647, so half?
+
 clear;
 load cropFaceImages;
 load crop_non_face_images;
-load classifiers3000;
+load classifiers1550;
 load training;
 load intergrals;
 load boosted15;
-% For bootstrapping, once we have trained a detector, we should apply it to
-% all images in training_faces and training_nonfaces, identify windows where
-% the detector makes mistakes, add those windows to the training examples, and retrain.
-
-% In order to implement bootstrapping, the following steps must be followed
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -258,7 +264,9 @@ examples(:, :, 3048:5647) = NonfaceArray;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 %%
+threshold = 5.1;
 nonFace = 0;
 face = 0;
 
@@ -266,20 +274,23 @@ face = 0;
 location_missed_classified = [];
 labels2 = [];
 
-for i =3000:5000
+for i =2750:3750
     
     photo = examples(:,:,i);
-    
-    photoT = imresize(photo, [60 60]);
-    result = apply_classifier_aux(photoT, boosted_classifier, weak_classifiers, [60 60]);
-    class = result(31,31);
+
+
+    result = boosted_multiscale_search(photo, 3, boosted_classifier, weak_classifiers, ...
+                              [60, 60]);
+                          
+    class = max(max(result));
+
     label = labels(i,1);
-    if (label == 1 && class < -4)
+    if (label == 1 && class <= threshold)
        location_missed_classified(end+1,1) = i;
        labels2(end+1,1) = label;
     end
     
-    if (label == -1 && class > -4)
+    if (label == -1 && class > threshold)
        location_missed_classified(end+1,1) = i;
        labels2(end+1,1) = label;
              
@@ -288,7 +299,7 @@ for i =3000:5000
   
 end
 %%
-
+num_misclassified = size(location_missed_classified,1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -298,7 +309,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 newExamples = [];
 
-for i = 1:363
+for i = 1:num_misclassified
     value = location_missed_classified(i,1);
     newExamples(:,:,i) = examples(:,:,value);
     
@@ -306,7 +317,7 @@ for i = 1:363
 end
 
 %%
-for i=1:137
+for i=1:200
    
     newExamples(:,:,end+1) = examples(:,:,i);
     labels2(end+1,1) = labels(i,1);
@@ -316,7 +327,7 @@ end
 
 %%
 %generate 2000 random classifiers  
-number = 2000;
+number = 1000;
 weak_classifiers2 = cell(1,number);
 for i = 1:number
     weak_classifiers2{i} = generate_classifier(60, 60);
@@ -325,9 +336,9 @@ end
 %save classifiersB2000 weak_classifiers2;
 %%
 classifier_number = numel(weak_classifiers2);
-responses2 =  zeros(classifier_number, 500);
+responses2 =  zeros(classifier_number, 498);
 
-for example = 1:500
+for example = 1:498
     integral = newExamples(:, :, example);
     for feature = 1:classifier_number
         classifier2 = weak_classifiers2 {feature};
@@ -341,7 +352,7 @@ end
 
 %%
 % pass data collected on responses, labels and number of rounds to AdaBoost
-boosted_classifier2 = AdaBoost(responses2, labels2, 30);
+boosted_classifier2 = AdaBoost(responses2, labels2, 15);
 
 %%
 %save BOOT_boosted_classifier boosted_classifier2
@@ -372,20 +383,6 @@ for i =3000:5000
     
   
 end
-
-
-
-
-
-% 1. (Initialization) choose some training examples, not too few, not too many
-% 2. Train the detector
-% 3. Apply the detector to all training images
-% 4. Identify mistakes. 
-% 5. Add mistakes to the training examples
-% 6. Repeat step 2 unless performance has stopped
-
-% training samples that may be used? We dont want to use all 5647, so half?
-%training_examples = zeros(60,60,2822);
 
 
 

@@ -11,6 +11,8 @@ testing_nonfaces_path = [training_directory, 'test_nonfaces'];
 testing_nonfaces_list = dir(testing_nonfaces_path);
 testing_nonfaces_list = remove_directories_from_dir_list(testing_nonfaces_list);
 
+num_testing_nonfaces = size(testing_nonfaces_list, 1);
+
 
 load intergrals;
 load training;
@@ -20,29 +22,32 @@ load classifiers1550;
 
 %TESTING FOR NONFACES IMAGES
 %%
+
+threshold = 5;
+
 predicted = 0;
 miss = 0;
-total = 0;
-%%
-for i =1:1
+
+for i =1:num_testing_nonfaces
     
     face2Test = getfield(testing_nonfaces_list(i),'name');
     photoT = read_gray(face2Test);
     
-    result = apply_classifier_aux(photoT, boosted_classifier, weak_classifiers, [60 60]);
+    %result = apply_classifier_aux(photoT, boosted_classifier, weak_classifiers, [60 60]);
+    result = boosted_multiscale_search(photoT, 3, boosted_classifier, weak_classifiers, ...
+                              [60, 60]);
+    %figure(i); imshow(result);
     class = max(max(result));
-    total = total + class;
    
-    if class <= 0
+    if class <= threshold
         predicted = predicted +1;
     else
         miss = miss +1;
     end
   
 end
-total = total / 36;
 
-nonFaceAcc = (predicted/36) * 100;
+nonFaceAcc = (predicted/num_testing_nonfaces) * 100;
 
 %%
 %TESTING CROPPED FACES IMAGES
@@ -50,15 +55,16 @@ testing_cropped_faces_path = [training_directory, 'test_cropped_faces'];
 testing_cropped_faces_list = dir(testing_cropped_faces_path);
 testing_cropped_faces_list = remove_directories_from_dir_list(testing_cropped_faces_list);
 
+num_testing_croppedfaces = size(testing_cropped_faces_list, 1);
+
 
 
 %TESTING FOR CROPPED FACES
 %%
 predicted = 0;
 miss = 0;
-total = 0;
-%%
-for i =1:770
+
+for i =1:num_testing_croppedfaces
     
     face2Test = getfield(testing_cropped_faces_list(i),'name');
     photoT = read_gray(face2Test);
@@ -67,10 +73,9 @@ for i =1:770
    
     result = apply_classifier_aux(photoT, boosted_classifier, weak_classifiers, [60 60]);
     class = result(31,31);
-    total = total + class;
     
     
-    if class > 0 
+    if class > threshold 
         predicted = predicted +1;
     else
         miss = miss +1;
@@ -78,8 +83,7 @@ for i =1:770
   
 end
 
-total = total / 770;
-croppedFaceAcc = (predicted/770) * 100;
+croppedFaceAcc = (predicted/num_testing_croppedfaces) * 100;
 
 
 %%
@@ -101,14 +105,12 @@ total = 0;
 for i =1:20
     
     face2Test = getfield(testing_faces_list(i),'name');
-    face2Test = double(imread(face2Test));
-    photoT = imresize(face2Test, [60 60]);
+    photoT = read_gray(face2Test);
     result = apply_classifier_aux(photoT, boosted_classifier, weak_classifiers, [60 60]);
-    class = result(31,31);
-    total = total + class;
+    class = max(max(result));
  
     
-    if class > -4
+    if class > threshold
         predicted = predicted +1;
     else
         miss = miss +1;
@@ -116,7 +118,6 @@ for i =1:20
   
 end
 
-total = total / 20;
 FaceAcc = (predicted/20) * 100;
 
 
