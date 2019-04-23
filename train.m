@@ -322,7 +322,7 @@ for i = 1:number
     weak_classifiers2{i} = generate_classifier(60, 60);
 end
 
-save classifiersB2000 weak_classifiers2;
+%save classifiersB2000 weak_classifiers2;
 %%
 classifier_number = numel(weak_classifiers2);
 responses2 =  zeros(classifier_number, 500);
@@ -344,7 +344,7 @@ end
 boosted_classifier2 = AdaBoost(responses2, labels2, 30);
 
 %%
-save BOOT_boosted_classifier boosted_classifier2
+%save BOOT_boosted_classifier boosted_classifier2
 
 %%
 %TESTING IF ADABOOST HELPED
@@ -386,21 +386,6 @@ end
 
 % training samples that may be used? We dont want to use all 5647, so half?
 %training_examples = zeros(60,60,2822);
-
-
-
-
-%%
-
-% The code below I was just running to test how our adaboost trained
-% detector behaved and whether it drew boxes correctly so far. We don't
-% need it for bootstrapping.
-%photo = read_gray('clintonAD2505_468x448.JPG');
-% apply the boosted detector, and get the 
-% top 2 matches.
-%[result, boxes] = boosted_detector_demo(photo, 1:0.5:3, boosted_classifier, weak_classifiers, [60, 60], 2);
-%figure(1); imshow(photo, []);
-%figure(2); imshow(result, [];
 
 
 

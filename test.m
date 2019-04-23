@@ -68,7 +68,7 @@ for i =1:770
     result = apply_classifier_aux(photoT, boosted_classifier, weak_classifiers, [60 60]);
     class = result(31,31);
     total = total + class;
-    disp(class);
+    
     
     if class > 0 
         predicted = predicted +1;
@@ -88,6 +88,8 @@ testing_faces_path = [training_directory, 'test_face_photos'];
 testing_faces_list = dir(testing_faces_path);
 testing_faces_list = remove_directories_from_dir_list(testing_faces_list);
 
+% size of testing test face list
+num_testing_faces = size(testing_faces_list, 1);
 
 
 %TESTING FOR FACES
@@ -128,13 +130,26 @@ FaceAcc = (predicted/20) * 100;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % read histograms
-clear;
 negative_histogram = read_double_image('negatives.bin');
 positive_histogram = read_double_image('positives.bin');
 
 %%
 
-testImg = double(imread('clintonAD2505_468x448.jpg'));
-
-result = detect_skin(testImg, positive_histogram,  negative_histogram);
-figure (2); imshow(result > .6, []);
+for i =1:1 %num_testing_faces-1
+    test_img = getfield(testing_faces_list(i),'name');
+    test_img = double(imread(test_img));
+    %test_img = double(imread('DSC04810.JPG'));
+    
+    % check if image is rgb and run skin detector if true
+    if(size(test_img, 3) == 3)
+        result_on_skin = detect_skin(test_img, positive_histogram,  negative_histogram);
+        %figure (i); imshow(result_on_skin > .6, []);
+        % run classifier after skin detection
+        result = apply_classifier_aux(result_on_skin, boosted_classifier, weak_classifiers, [60 60]);
+        figure(i); imshow(result, []);
+        %[result, boxes] = boosted_detector_demo(test_img, 1, boosted_classifier, weak_classifiers, [60, 60], 2);
+        %figure(i); imshow(result, []);
+        
+    end
+      
+end
