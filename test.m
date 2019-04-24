@@ -16,7 +16,7 @@ num_testing_nonfaces = size(testing_nonfaces_list, 1);
 
 load intergrals;
 load training;
-load boosted30;
+load boosted50;
 load classifiers5000;
 threshold = 5;
 
@@ -141,24 +141,23 @@ positive_histogram = read_double_image('positives.bin');
 %%
 
 for i =1:1 %num_testing_faces-1
-    test_img = getfield(testing_faces_list(i),'name');
-    test_img = double(imread(test_img));
-    %test_img = double(imread('DSC06510.JPG'));
+    test_img1 = getfield(testing_faces_list(i),'name');
+    test_img = double(imread(test_img1));
+    %imshow(test_img/255);
+    test_img2 = read_gray(test_img1);
     
     % check if image is rgb and run skin detector if true
     if(size(test_img, 3) == 3)
         result_on_skin = detect_skin(test_img, positive_histogram,  negative_histogram);
-        figure (i); imshow(result_on_skin > .9, []);
-        result = boosted_detector_demo(result_on_skin,2,  boosted_classifier, ...
-                          weak_classifiers, [60,60], 2);
-
+        %figure (i); imshow(result_on_skin, []);
+                     
         % run classifier after skin detection
+        %result = apply_classifier_aux(result_on_skin, boosted_classifier, weak_classifiers, [60 60]);
+        %figure(i); imshow(result, []);
         
-        figure(2); imshow(result, []);
-      
-        
-  
-        
+        result = boosted_detector_demo(test_img2,test_img2, 2,  boosted_classifier, ...
+                          weak_classifiers, [60,60], 2);
+        figure(i); imshow(result, []);
     end
       
 end

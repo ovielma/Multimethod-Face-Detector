@@ -8,3 +8,6 @@ classifiers1550.mat
 cropFaceImages.mat
 crop_non_face_images.mat
 intergrals.mat
+boosted30.mat
+boosted50.mat
+classifiers5000.mat

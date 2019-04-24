@@ -186,12 +186,12 @@ save training responses labels classifier_number example_number;
 
 %%
 % pass data collected on responses, labels and number of rounds to AdaBoost
-boosted_classifier = AdaBoost(responses, labels, 30);
+boosted_classifier = AdaBoost(responses, labels, 50);
 
 % save boosted classifier to load in test file once bootstrapping &
 % cascading are applied. Uncomment and run code below to save.
 
-save boosted30 boosted_classifier
+%save boosted50 boosted_classifier
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
