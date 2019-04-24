@@ -186,12 +186,13 @@ save training responses labels classifier_number example_number;
 
 %%
 % pass data collected on responses, labels and number of rounds to AdaBoost
+tic;
 boosted_classifier = AdaBoost(responses, labels, 50);
-
+toc;
 % save boosted classifier to load in test file once bootstrapping &
 % cascading are applied. Uncomment and run code below to save.
-
-%save boosted50 boosted_classifier
+%%
+save boosted50 boosted_classifier
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -217,7 +218,7 @@ load crop_non_face_images;
 load classifiers5000;
 load training;
 load intergrals;
-load boosted30;
+load boosted50;
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -346,25 +347,26 @@ end
 
 save classifiersB3500 weak_classifiers2;
 %%
-classifier_number = numel(weak_classifiers2);
-responses2 =  zeros(classifier_number, 1197);
+%classifier_number = numel(weak_classifiers2);
+%responses2 =  zeros(classifier_number, 1059);
 
-for example = 1:1197
-    integral = newExamples(:, :, example);
-    for feature = 1:classifier_number
-        classifier2 = weak_classifiers2 {feature};
-        responses2(feature, example) = eval_weak_classifier(classifier2, integral);
-    end
-    disp(example)
-end
+%for example = 1:1059
+    %integral = newExamples(:, :, example);
+    %for feature = 1:classifier_number
+        %classifier2 = weak_classifiers2 {feature};
+        %responses2(feature, example) = eval_weak_classifier(classifier2, integral);
+    %end
+    %disp(example)
+%end
 
 
 
 
 %%
 % pass data collected on responses, labels and number of rounds to AdaBoost
-boosted_classifier2 = AdaBoost(responses2, labels2, 70);
+
+%boosted_classifier2 = AdaBoost(responses2, labels2, 50);
 
 
-save BOOT_boosted_classifier boosted_classifier2
+%save BOOT_boosted_classifier boosted_classifier2
 

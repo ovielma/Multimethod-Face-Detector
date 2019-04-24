@@ -165,13 +165,13 @@ close all;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-cascade_faces = zeros(:);
-cascade_nonfaces = zeros(:);
+cascade_faces = [];
+cascade_nonfaces = [];
 
 %%
 for i = 1:classifier_number-1
     
-    result = cascade_classify(window)
+    %result = cascade_classify(window);
     
     if result == 1
         cascade_faces = result;
