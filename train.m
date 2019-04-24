@@ -196,38 +196,39 @@ boosted_classifier = AdaBoost(responses, labels, 50);
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%
-%%%  Bootstrapping
+%%%  - - - - - - - - -Bootstrapping - - - - - -
 %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% In order to implement bootstrapping, the following steps must be followed
 
-% 1. (Initialization) choose some training examples, not too few, not too many
-% 2. Train the detector
-% 3. Apply the detector to all training images
-% 4. Identify mistakes. 
-% 5. Add mistakes to the training examples
-% 6. Repeat step 2 unless performance has stopped
-
-% training samples that may be used? We dont want to use all 5647, so half?
+%Load in values
 
 clear;
 load cropFaceImages;
 load crop_non_face_images;
-load classifiers1550;
+load classifiers5000;
 load training;
 load intergrals;
-load boosted15;
+load boosted30;
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%- - - - -CONVERTING CELL ARRAYS TO MATRICES- - - 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%CONVERTING CELL ARRAYS TO MATRICES
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Converting cell array of images 130 x 20 to cell array 2600 x 1 for easy
+%readabliity 
 cropNonFaces2 = {};
 for i =1:130
   for j =1:20
@@ -238,107 +239,117 @@ for i =1:130
 end
 
 %%
-%convert cell array to matrix
+%FACES
+%convert cell array to matrix 
 faceArray = zeros(60,60,3047);
 for i = 1: 3047
     faceArray(:,:,i) = cell2mat(cropFaces(i));
 end
 
+
 %%
+%NON FACES
 %convert cell array to matrix
 NonfaceArray = zeros(60,60,(20*130));
 for i = 1: 2600
     NonfaceArray(:,:,i) = cell2mat(cropNonFaces2(i));
 end
 
+%disp(NonfaceArray(:,:,2600));
 
-examples (:, :, 1:3047) = faceArray;
+% STORE ALL FACE AND NONFACE IMAGES IN ARRAY 60x60xindex
+examples(:, :, 1:3047) = faceArray;
 examples(:, :, 3048:5647) = NonfaceArray;
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%Identify misclassifications 
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%disp(examples(:,:,5647));
 
 %%
-threshold = 5.1;
-nonFace = 0;
-face = 0;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%- - - - - -Identify misclassifications- - - - -  
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%
+
+
+threshold = 5;
+
 location_missed_classified = [];
-labels2 = [];
+location_right_classified = [];
+labels_right_classified = [];
+labels_of_misclassified = [];
 
-for i =2750:3750
+
+%%
+for i =1:5647
     
     photo = examples(:,:,i);
-
-
-    result = boosted_multiscale_search(photo, 3, boosted_classifier, weak_classifiers, ...
-                              [60, 60]);
+    result =apply_classifier_aux(photo, boosted_classifier, weak_classifiers, [60 60]);
                           
     class = max(max(result));
 
     label = labels(i,1);
     if (label == 1 && class <= threshold)
        location_missed_classified(end+1,1) = i;
-       labels2(end+1,1) = label;
-    end
+       labels_of_misclassified(end+1,1) = label;
     
-    if (label == -1 && class > threshold)
+    elseif(label == -1 && class > threshold)
+        
        location_missed_classified(end+1,1) = i;
-       labels2(end+1,1) = label;
+       labels_of_misclassified(end+1,1) = label;
              
+    else
+        location_right_classified(end+1,1) = i;
+        labels_right_classified(end+1,1) = label;
     end
-    
-  
 end
 %%
-num_misclassified = size(location_missed_classified,1);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%RETRAIN MISCLASSIFICATIONS 
+%- - - - -RETRAIN MISCLASSIFICATIONS- - - - - - 
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 newExamples = [];
+num_misclassified = size(location_missed_classified,1);
+labels2 = [];
 
 for i = 1:num_misclassified
     value = location_missed_classified(i,1);
     newExamples(:,:,i) = examples(:,:,value);
+    labels2(end+1,1) = labels_of_misclassified(i,1);
     
     
 end
 
-%%
-for i=1:200
+
+%% add some values that were classified correctly 
+for i=1:1000
    
-    newExamples(:,:,end+1) = examples(:,:,i);
-    labels2(end+1,1) = labels(i,1);
+    value = location_right_classified(i+4000,1);
+    newExamples(:,:,end+1) = examples(:,:,value);
+    labels2(end+1,1) = labels_right_classified(i+4000,1);
 end
 
 
 
 %%
-%generate 2000 random classifiers  
+%generate 3500 random classifiers  
 number = 1000;
 weak_classifiers2 = cell(1,number);
 for i = 1:number
     weak_classifiers2{i} = generate_classifier(60, 60);
 end
 
-%save classifiersB2000 weak_classifiers2;
+save classifiersB3500 weak_classifiers2;
 %%
 classifier_number = numel(weak_classifiers2);
-responses2 =  zeros(classifier_number, 498);
+responses2 =  zeros(classifier_number, 1197);
 
-for example = 1:498
+for example = 1:1197
     integral = newExamples(:, :, example);
     for feature = 1:classifier_number
         classifier2 = weak_classifiers2 {feature};
@@ -352,37 +363,8 @@ end
 
 %%
 % pass data collected on responses, labels and number of rounds to AdaBoost
-boosted_classifier2 = AdaBoost(responses2, labels2, 15);
-
-%%
-%save BOOT_boosted_classifier boosted_classifier2
-
-%%
-%TESTING IF ADABOOST HELPED
-location_missed_classified2 = [];
-labels3 = [];
-
-for i =3000:5000
-    
-    photo = examples(:,:,i);
-    
-    photoT = imresize(photo, [60 60]);
-    result = apply_classifier_aux(photoT, boosted_classifier2, weak_classifiers2, [60 60]);
-    class = result(31,31);
-    label = labels(i,1);
-    if (label == 1 && class < -4)
-       location_missed_classified2(end+1,1) = i;
-       labels3(end+1,1) = label;
-    end
-    
-    if (label == -1 && class > -4)
-       location_missed_classified2(end+1,1) = i;
-       labels3(end+1,1) = label;
-             
-    end
-    
-  
-end
+boosted_classifier2 = AdaBoost(responses2, labels2, 70);
 
 
+save BOOT_boosted_classifier boosted_classifier2
 
