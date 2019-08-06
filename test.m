@@ -145,7 +145,7 @@ for i =1:num_testing_faces-1
     % check if image is rgb and run skin detector if true
     if(size(test_img, 3) == 3)
         result_on_skin = detect_skin(test_img, positive_histogram,  negative_histogram);
-        %figure (i); imshow(result_on_skin, []);
+        figure (i); imshow(result_on_skin, []);
         
         result = boosted_detector_demo(test_img2,test_img2, 2,  boosted_classifier, ...
                           weak_classifiers, [60,60], 4);
